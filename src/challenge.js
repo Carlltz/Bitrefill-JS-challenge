@@ -35,12 +35,19 @@ async function getData(key) {
 }
 
 async function mustachify(input, callback) {
-  // TODO: FINISH THIS FUNCTION
-
+  // Matches the patterns of the "variables" in the string.
+  // Uses a capture group in regex so that for example match[0] = {{A}} & match[1] = A.
   while ((match = input.match(/{{(.*?)}}/)) != null) {
+    // Replaces {{A}} with the value from getData(A)
     input = input.replace(match[0], await callback(match[1]));
   }
-  return input;
+  return input; // Returns input when no more matches is found.
+
+  /* 
+  // Above code is formated for readability but it could be a "almost" one liner like this:
+  while ((match = input.match(/{{(.*?)}}/)) != null) input = input.replace(match[0], await callback(match[1]));
+  return input; 
+  */
 }
 
 async function run() {
