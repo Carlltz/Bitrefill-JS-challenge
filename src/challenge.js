@@ -35,10 +35,11 @@ async function getData(key) {
 }
 
 async function mustachify(input, callback) {
+  // While loop:
   // Matches the patterns of the "variables" in the string.
-  // Uses a capture group in regex so that for example match[0] = {{A}} & match[1] = A.
+  // Also, uses a capture group in regex so that for example match[0] = {{A}} & match[1] = A.
   while ((match = input.match(/{{(.*?)}}/)) != null) {
-    // Replaces {{A}} with the value from getData(A)
+    // Replace {{A}} with the value from getData(A):
     input = input.replace(match[0], await callback(match[1]));
   }
   return input; // Returns input when no more matches is found.
