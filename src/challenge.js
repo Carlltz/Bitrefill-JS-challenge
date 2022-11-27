@@ -37,9 +37,8 @@ async function getData(key) {
 async function mustachify(input, callback) {
   // TODO: FINISH THIS FUNCTION
 
-  while ((match = input.match(/({{.*?}})/)) != null) {
-    let key = match[0].replace(/{{|}}/g, "");
-    input = input.replace(match[0], await callback(key));
+  while ((match = input.match(/{{(.*?)}}/)) != null) {
+    input = input.replace(match[0], await callback(match[1]));
   }
   return input;
 }
