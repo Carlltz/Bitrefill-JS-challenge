@@ -35,20 +35,26 @@ async function getData(key) {
 }
 
 async function mustachify(input, callback) {
-  // While loop:
-  // Matches the patterns of the "variables" in the string.
-  // Also, uses a capture group in regex so that for example match[0] = {{A}} & match[1] = A.
-  while ((match = input.match(/{{(.*?)}}/)) != null) {
-    // Replace {{A}} with the value from getData(A):
-    input = input.replace(match[0], await callback(match[1]));
-  }
-  return input; // Returns input when no more matches is found.
+  while (input.match(/{{(.*?)}}/) != null) {
+    // While there's still callback elements in input run code: (Takes nested callback elements into consideration)
 
-  /* 
-  // Above code is formated for readability but it could be a "almost" one liner like this:
-  while ((match = input.match(/{{(.*?)}}/)) != null) input = input.replace(match[0], await callback(match[1]));
-  return input; 
-  */
+    input = [input]; // Make input into an array
+    while ((match = input[input.length - 1].match(/{{(.*?)}}/)) != null) {
+      // Fill array with promises of callback elements: (Only one level deep, missing the nested callback elements)
+      let lastElement = input.pop(); // Remove and save last element
+      input.push(...lastElement.split(match[0])); // Spread last element, but split at the matched callback element
+      input.splice(input.length - 1, 0, callback(match[1])); // Insert callback elements value
+    }
+
+    // Await all promises:
+    await Promise.all(input).then((values) => {
+      input = values;
+    });
+
+    // Make string of array. This makes it easier to check for callback elements and probably faster then checking through the whole array one element at a time
+    input = input.join("");
+  }
+  return await input; // Returns input when no more matches is found.
 }
 
 async function run() {
